@@ -1,12 +1,10 @@
 import argparse
-import numpy as np
 import utils.datagen as datagen
 
 from keras import backend as k
 from keras.layers import Dropout, Flatten, Dense
 from keras.layers import Convolution2D, MaxPooling2D
-from keras.models import Sequential, load_model
-
+from keras.models import Sequential
 
 k.set_image_dim_ordering('tf')
 
@@ -59,29 +57,6 @@ def train():
         del model
 
 
-def predict():
-        # label list: training dataset
-        train_generator, validation_generator = datagen.train()
-        labels = dict((v, k) for k, v in train_generator.class_indices.items())
-
-        # model load
-        model = load_model(FLAGS.model)
-        model.summary()
-
-        # test data
-        test_generator = datagen.test()
-
-        # predict
-        predictions = model.predict_generator(test_generator, test_generator.nb_sample)
-
-        # best label index
-        y = np.argmax(predictions, axis=1)
-
-        # result
-        for (file, index) in zip(test_generator.filenames, y):
-                print('result: "%s" predict "%s" class.' % (file, labels[index]))
-
-
 if __name__ == '__main__':
         parser = argparse.ArgumentParser()
         parser.add_argument('--model', type=str, default='model.h5',
@@ -90,5 +65,3 @@ if __name__ == '__main__':
                             help='***')
         FLAGS, unparsed = parser.parse_known_args()
         train()
-        predict()
-
