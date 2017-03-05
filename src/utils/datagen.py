@@ -1,8 +1,8 @@
 from keras.preprocessing.image import ImageDataGenerator
 
 
-def generator():
-    # 訓練データとバリデーションデータを生成するジェネレータを作成
+def train():
+    # train, validation data
     train_datagen = ImageDataGenerator(
         rescale=1./255,
         shear_range=0.2,
@@ -25,3 +25,15 @@ def generator():
         batch_size=32,
         class_mode='categorical')
     return train_generator, validation_generator
+
+
+def test():
+    # test data: don't shuffle
+    datagen = ImageDataGenerator(rescale=1./255)
+    test_generator = datagen.flow_from_directory(
+        'data/test',
+        shuffle=False,
+        target_size=(64, 64),
+        batch_size=32,
+        class_mode='categorical')
+    return test_generator

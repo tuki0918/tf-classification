@@ -1,16 +1,12 @@
-
-# http://aidiary.hatenablog.com/entry/20170110/1484057655
-# http://qiita.com/supersaiakujin/items/b9c9da9497c2163d5a74
-
 import argparse
 import numpy as np
+import utils.datagen as datagen
 
 from keras import backend as k
-from keras.layers import Activation, Dropout, Flatten, Dense
+from keras.layers import Dropout, Flatten, Dense
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.models import Sequential, load_model
-from keras.preprocessing.image import ImageDataGenerator
-from utils.datagen import generator
+
 
 k.set_image_dim_ordering('tf')
 
@@ -18,7 +14,7 @@ FLAGS = None
 
 
 def train():
-        train_generator, validation_generator = generator()
+        train_generator, validation_generator = datagen.train()
 
         model = Sequential()
 
@@ -59,27 +55,21 @@ def train():
                 nb_val_samples=200)
 
         # model store
-        model.save('model.h5')
+        model.save(FLAGS.model)
         del model
 
 
 def predict():
         # label list: training dataset
-        train_generator, validation_generator = generator()
+        train_generator, validation_generator = datagen.train()
         labels = dict((v, k) for k, v in train_generator.class_indices.items())
 
         # model load
-        model = load_model('model.h5')
+        model = load_model(FLAGS.model)
         model.summary()
 
-        # test data: don't shuffle
-        datagen = ImageDataGenerator(rescale=1./255)
-        test_generator = datagen.flow_from_directory(
-                'data/test',
-                shuffle=False,
-                target_size=(64, 64),
-                batch_size=32,
-                class_mode='categorical')
+        # test data
+        test_generator = datagen.test()
 
         # predict
         predictions = model.predict_generator(test_generator, test_generator.nb_sample)
@@ -88,14 +78,17 @@ def predict():
         y = np.argmax(predictions, axis=1)
 
         # result
-        for (file, index) in zip (test_generator.filenames, y):
+        for (file, index) in zip(test_generator.filenames, y):
                 print('result: "%s" predict "%s" class.' % (file, labels[index]))
 
 
 if __name__ == '__main__':
         parser = argparse.ArgumentParser()
+        parser.add_argument('--model', type=str, default='model.h5',
+                            help='***')
         parser.add_argument('--nb_epoch', type=int, default=50,
                             help='***')
         FLAGS, unparsed = parser.parse_known_args()
         train()
         predict()
+
