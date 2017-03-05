@@ -18,6 +18,8 @@ FLAGS = None
 
 
 def train():
+        train_generator, validation_generator = generator()
+
         # モデルを構築
         model = Sequential()
         model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=(64, 64, 3)))
@@ -31,7 +33,8 @@ def train():
         model.add(Dense(64, activation='relu'))
         model.add(Dropout(0.5))
 
-        model.add(Dense(FLAGS.nb_classes, activation='softmax'))
+        # nb_class ... length of classifications: training dataset
+        model.add(Dense(train_generator.nb_class, activation='softmax'))
 
         model.summary()
 
@@ -40,12 +43,6 @@ def train():
         model.compile(loss='categorical_crossentropy',
                       optimizer='adam',
                       metrics=['accuracy'])
-
-        # # 結果を保存
-        # model.save_weights(os.path.join(result_dir, 'smallcnn.h5'))
-        # save_history(history, os.path.join(result_dir, 'history_smallcnn.txt'))
-
-        train_generator, validation_generator = generator()
 
         # 訓練
         history = model.fit_generator(
@@ -58,22 +55,12 @@ def train():
         # 成果物
         model.save('model.h5')
         del model
-        # open('model.json', 'w').write(model.to_json())
-        # # h5py
-        # model.save_weights('model_weights.hdf5')
 
 
 def predict():
         model = load_model('model.h5')
 
-        # model.summary()
-
-        # model.compile(loss='categorical_crossentropy',
-        #               optimizer='adam',
-        #               metrics=['accuracy'])
-        #
-        # # .hdf5
-        # model.load_weights('model_weights.hdf5')
+        model.summary()
 
         datagen = ImageDataGenerator(rescale=1./255)
         generator = datagen.flow_from_directory(
@@ -82,8 +69,7 @@ def predict():
                 batch_size=32,
                 class_mode='categorical')
 
-        # TODO test sample length
-        predictions = model.predict_generator(generator, 2)
+        predictions = model.predict_generator(generator, generator.nb_sample)
 
         print(predictions)
         print(np.argmax(predictions, axis=1))
@@ -97,9 +83,6 @@ def predict():
 if __name__ == '__main__':
         parser = argparse.ArgumentParser()
         parser.add_argument('--nb_epoch', type=int, default=50,
-                            help='***')
-        # TODO: traing data length
-        parser.add_argument('--nb_classes', type=int, default=1,
                             help='***')
         FLAGS, unparsed = parser.parse_known_args()
         train()
