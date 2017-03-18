@@ -1,7 +1,7 @@
 from keras.preprocessing.image import ImageDataGenerator
 
 
-def train():
+def train(path='data'):
     # train, validation data
     train_datagen = ImageDataGenerator(
         rescale=1./255,
@@ -12,14 +12,14 @@ def train():
     test_datagen = ImageDataGenerator(rescale=1./255)
 
     train_generator = train_datagen.flow_from_directory(
-        'data/train',
+        '{}/train'.format(path),
         # color_mode='grayscale',
         target_size=(64, 64),
         batch_size=32,
         class_mode='categorical')
 
     validation_generator = test_datagen.flow_from_directory(
-        'data/validation',
+        '{}/validation'.format(path),
         # color_mode='grayscale',
         target_size=(64, 64),
         batch_size=32,
@@ -27,11 +27,11 @@ def train():
     return train_generator, validation_generator
 
 
-def test():
+def test(path='data'):
     # test data: don't shuffle
     datagen = ImageDataGenerator(rescale=1./255)
     test_generator = datagen.flow_from_directory(
-        'data/test',
+        '{}/test'.format(path),
         shuffle=False,
         target_size=(64, 64),
         batch_size=32,
