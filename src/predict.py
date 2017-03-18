@@ -5,7 +5,7 @@ import utils.datagen as datagen
 from keras import backend as k
 from keras.models import load_model
 
-k.set_image_dim_ordering('tf')
+k.set_image_data_format('channels_last')
 
 FLAGS = None
 
@@ -23,7 +23,7 @@ def predict():
     test_generator = datagen.test()
 
     # predict
-    predictions = model.predict_generator(test_generator, test_generator.nb_sample)
+    predictions = model.predict_generator(test_generator, test_generator.samples)
 
     # best label index
     y = np.argmax(predictions, axis=1)

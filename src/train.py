@@ -3,10 +3,10 @@ import utils.datagen as datagen
 
 from keras import backend as k
 from keras.layers import Dropout, Flatten, Dense
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D
 from keras.models import Sequential
 
-k.set_image_dim_ordering('tf')
+k.set_image_data_format('channels_last')
 
 FLAGS = None
 
@@ -17,11 +17,11 @@ def train():
     model = Sequential()
 
     # conv1
-    model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=(64, 64, 3)))
+    model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(64, 64, 3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     # conv2
-    model.add(Convolution2D(64, 3, 3, border_mode='same', activation='relu'))
+    model.add(Conv2D(64, (3, 3), padding='same', activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     # one dim
@@ -33,7 +33,7 @@ def train():
 
     # fc2
     # dim ... length of classifications: training dataset
-    model.add(Dense(train_generator.nb_class, activation='softmax'))
+    model.add(Dense(train_generator.num_class, activation='softmax'))
 
     # model visualize
     model.summary()
@@ -47,10 +47,10 @@ def train():
     # learning
     history = model.fit_generator(
         train_generator,
-        samples_per_epoch=500,
-        nb_epoch=FLAGS.nb_epoch,
+        steps_per_epoch=500,
+        epochs=FLAGS.nb_epoch,
         validation_data=validation_generator,
-        nb_val_samples=200)
+        validation_steps=200)
 
     # model store
     model.save(FLAGS.model)
