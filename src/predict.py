@@ -25,12 +25,15 @@ def predict():
     # predict
     predictions = model.predict_generator(test_generator, test_generator.samples)
 
-    # best label index
-    y = np.argmax(predictions, axis=1)
-
     # result
-    for (file, index) in zip(test_generator.filenames, y):
-        print('result: "%s" predict "%s" class.' % (file, labels[index]))
+    for (file, prediction) in zip(test_generator.filenames, predictions):
+        print('')
+        print('##############################')
+        print('')
+        print('result: "%s" predict ...' % (file))
+        ys = np.argsort(prediction)[::-1][:5]
+        for y in ys:
+            print('> %f "%s" class.' % (prediction[y], labels[y]))
 
 
 if __name__ == '__main__':
